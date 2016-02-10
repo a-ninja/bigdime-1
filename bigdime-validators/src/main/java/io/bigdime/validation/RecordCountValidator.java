@@ -58,6 +58,25 @@ public class RecordCountValidator implements Validator {
 	private static final Logger logger = LoggerFactory.getLogger(RecordCountValidator.class);
 	
 	private String name;
+	
+	protected boolean isReadyToValidate(final ActionEvent actionEvent) {
+		String hdfsBasePath = actionEvent.getHeaders().get(ActionEventHeaderConstants.HDFS_PATH);
+		String hdfsFileName = actionEvent.getHeaders().get(ActionEventHeaderConstants.HDFS_FILE_NAME);
+
+
+		String totalSize = actionEvent.getHeaders().get(ActionEventHeaderConstants.SOURCE_FILE_TOTAL_SIZE);
+		String totalRead = actionEvent.getHeaders().get(ActionEventHeaderConstants.SOURCE_FILE_TOTAL_READ);
+		
+		String validationReady = actionEvent.getHeaders().get(ActionEventHeaderConstants.VALIDATION_READY);
+		if (validationReady == null || !validationReady.equalsIgnoreCase("true")) {
+			logger.info(AdaptorConfig.getInstance().getAdaptorContext().getAdaptorName(),
+					"processing RawChecksumValidator",
+					"Raw Checksum validation being skipped, totalSize={} totalRead={} hdfsBasePath={} hdfsFileName={} validationReady={}",
+					totalSize, totalRead, hdfsBasePath, hdfsFileName, validationReady);
+			return false;
+		}
+		return true;
+	}
 
 	/**
 	 * This validate method will compare Hdfs record count and source record
@@ -90,7 +109,7 @@ public class RecordCountValidator implements Validator {
 		commonCheckValidator.checkNullStrings(ActionEventHeaderConstants.HOST_NAMES, host);
 		commonCheckValidator.checkNullStrings(ActionEventHeaderConstants.PORT, portString);
 		commonCheckValidator.checkNullStrings(ActionEventHeaderConstants.USER_NAME, userName);
-		
+
 		try {
 			int port = Integer.parseInt(portString);
 			if (webHdfs == null) {
@@ -104,6 +123,25 @@ public class RecordCountValidator implements Validator {
 					"Illegal port number input while parsing string to integer");
 			throw new NumberFormatException();
 		}
+		
+		if (!isReadyToValidate(actionEvent)) {
+			validationPassed.setValidationResult(ValidationResult.NOT_READY);
+			return validationPassed;
+		}
+		
+//		try {
+//			int port = Integer.parseInt(portString);
+//			if (webHdfs == null) {
+//				webHdfs = WebHdfs.getInstance(host, port)
+//						.addHeader(WebHDFSConstants.CONTENT_TYPE,WebHDFSConstants.APPLICATION_OCTET_STREAM)
+//						.addParameter(WebHDFSConstants.USER_NAME, userName)
+//						.addParameter("overwrite", "false");
+//			}
+//		} catch (NumberFormatException e) {
+//			logger.warn(AdaptorConfig.getInstance().getAdaptorContext().getAdaptorName(), "NumberFormatException",
+//					"Illegal port number input while parsing string to integer");
+//			throw new NumberFormatException();
+//		}
 
 		commonCheckValidator.checkNullStrings(ActionEventHeaderConstants.SOURCE_RECORD_COUNT, srcRCString);
 		try {
