@@ -307,7 +307,7 @@ public class WebHDFSWriterHandler extends AbstractHandler {
 							"writing to hdfs. previousHdfsPath={} detokenizedHdfsPath={} previousHdfsPathWithName={} detokenizedHdfsPathWithName={}",
 							getPreviousHdfsPath(journal), detokenizedHdfsPath, getPreviousHdfsPathWithName(journal),
 							detokenizedHdfsPathWithName);
-					actionEvent.getHeaders().put(ActionEventHeaderConstants.READ_COMPLETE, Boolean.FALSE.toString());
+					actionEvent.getHeaders().put(ActionEventHeaderConstants.VALIDATION_READY, Boolean.FALSE.toString());
 					ActionEvent returnEvent = writeToHdfs(detokenizedHdfsPath, payload.toByteArray(), hdfsFileName,
 							hdfsFilePathBuilder, actionEvent);
 					getHandlerContext().createSingleItemEventList(returnEvent);
