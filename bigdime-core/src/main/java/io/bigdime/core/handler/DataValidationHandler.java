@@ -106,6 +106,8 @@ public class DataValidationHandler extends AbstractHandler {
 					logger.debug("DataValidationHandler processing event", "updated runtime info");
 				} else {
 					logger.debug("DataValidationHandler processing event", "validation was skipped");
+					updateRuntimeInfoToStoreAfterValidation(runtimeInfoStore, RuntimeInfoStore.Status.STARTED, actionEvent);
+					logger.debug("DataValidationHandler processing event", "updated runtime info");
 				}
 			} catch (DataValidationException e) {
 				logger.alert(ALERT_TYPE.INGESTION_FAILED, ALERT_CAUSE.VALIDATION_ERROR, ALERT_SEVERITY.BLOCKER,
